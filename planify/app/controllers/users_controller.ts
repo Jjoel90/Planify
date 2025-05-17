@@ -2,6 +2,8 @@ import type { HttpContext } from '@adonisjs/core/http'
 // import vine from '@vinejs/vine' 
 import User from '#models/user'
 import { createUserValidator } from '#validators/user'
+import { createLoginValidator } from '#validators/login'
+import { log } from 'console'
 
 export default class UsersController {
     public async showSignup({view}: HttpContext) {
@@ -33,13 +35,15 @@ export default class UsersController {
         return view.render('security/login')
 
     }
+    public async login({ request, auth, response }: HttpContext) {
+          
+            const payload = await request.validateUsing(createLoginValidator)
+        
+            const user = await User.verifyCredentials(payload.email, payload.password)
+            
+            await auth.use('web').login(user)
+
+           return response.redirect('/')
+    }
 
 }
-
-
-
-
-
-
-
-
